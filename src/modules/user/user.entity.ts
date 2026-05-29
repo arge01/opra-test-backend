@@ -1,6 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, BeforeInsert, BeforeUpdate, OneToMany, Relation } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { Purchase } from '../purchase/purchase.entity.js';
 
 @Entity()
 export class User {
@@ -24,9 +23,6 @@ export class User {
 
   @CreateDateColumn()
   createdAt: Date;
-
-  @OneToMany(() => Purchase, (purchase) => purchase.user)
-  purchases: Relation<Purchase[]>;
 
   @BeforeInsert()
   @BeforeUpdate()

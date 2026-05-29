@@ -16,11 +16,15 @@ export class PurchaseService {
       take: options.limit,
       skip: options.skip,
       order: { purchasedAt: 'DESC' },
+      relations: ['product'],
     });
   }
 
   async get(id: string) {
-    const purchase = await this.purchaseRepository.findOne({ where: { id } });
+    const purchase = await this.purchaseRepository.findOne({ 
+      where: { id },
+      relations: ['product']
+    });
     if (!purchase) {
       throw new NotFoundException(`Purchase with id ${id} not found`);
     }

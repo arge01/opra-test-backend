@@ -19,10 +19,6 @@ export class Purchase {
   @CreateDateColumn()
   purchasedAt: Date;
 
-  @ManyToOne(() => User, (user) => user.purchases, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'userId' })
-  user: Relation<User>;
-
   @ManyToOne(() => Product, (product) => product.purchases, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'productId' })
   product: Relation<Product>;
