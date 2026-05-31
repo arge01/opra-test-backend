@@ -10,32 +10,43 @@ export class ShipmentService implements OnModuleInit {
   constructor(
     @InjectRepository(Shipment)
     private shipmentRepository: Repository<Shipment>,
-  ) {}
+  ) { }
 
   async onModuleInit() {
     const count = await this.shipmentRepository.count();
     if (count === 0) {
-      console.log('Generating mock shipments...');
+      console.log('Generating shipments for all products...');
       const statuses = Object.values(ShipmentStatus);
-      const shipments = [];
-      for (let i = 0; i < 20; i++) {
-        shipments.push(
-          this.shipmentRepository.create({
-            productId: faker.string.uuid(),
-            userId: faker.string.uuid(),
-            status: faker.helpers.arrayElement(statuses),
-          }),
-        );
+      // Since both are in the same MySQL DB now, we can query products directly using the manager
+      await this.shipmentRepository.query("TRUNCATE TABLE shipments");
+      const products = await this.shipmentRepository.manager.query('SELECT id FROM products');
+
+      const shipments = products.map((product: any) =>
+        this.shipmentRepository.create({
+          productId: product.id,
+          userId: faker.string.uuid(), // Generate a mock user id or fetch from users table
+          status: faker.helpers.arrayElement(statuses),
+        })
+      );
+
+      // Save in chunks to prevent large query packets
+      for (let i = 0; i < shipments.length; i += 500) {
+        await this.shipmentRepository.save(shipments.slice(i, i + 500));
       }
-      await this.shipmentRepository.save(shipments);
-      console.log('Mock shipments generated!');
+      console.log(`Generated ${shipments.length} shipments!`);
     }
   }
 
-  async findMany(options: { limit: number; skip: number }) {
+  async findMany(options: { limit: number; skip: number; productId?: string }) {
+    const where: any = {};
+    if (options.productId) {
+      where.productId = options.productId;
+    }
+
     return this.shipmentRepository.find({
       take: options.limit,
       skip: options.skip,
+      where,
       order: { createdAt: 'DESC' },
     });
   }
@@ -45,6 +56,8 @@ export class ShipmentService implements OnModuleInit {
     if (!shipment) {
       throw new NotFoundException(`Shipment with id ${id} not found`);
     }
+
+
     return shipment;
   }
 }

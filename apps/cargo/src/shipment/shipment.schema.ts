@@ -15,7 +15,7 @@ export class ShipmentType {
   userId: string;
 
   @ApiField({
-    type: 'string',
+    type: ShipmentStatus,
   })
   status: ShipmentStatus;
 

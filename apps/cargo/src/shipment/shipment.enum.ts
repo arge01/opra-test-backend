@@ -9,4 +9,4 @@ export enum ShipmentStatus {
   FAILED_DELIVERY = 'FAILED_DELIVERY',
 }
 
-
+EnumType.apply(void 0, [ShipmentStatus, { name: 'ShipmentStatus', description: 'Shipping status' }]);
